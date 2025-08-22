@@ -1,6 +1,10 @@
 import axios from 'axios';
 
-const API_BASE_URL = 'http://localhost:5000/api/v1';
+//const API_BASE_URL = 'https://military-asset-management-system-9u0c.onrender.com/api/v1'||'http://localhost:5000/api/v1';
+const API_BASE_URL =
+  window.location.hostname === "localhost"
+    ? "http://localhost:5000/api/v1"
+    : "https://military-asset-management-system-9u0c.onrender.com/api/v1";
 
 const api = axios.create({
   baseURL: API_BASE_URL,
