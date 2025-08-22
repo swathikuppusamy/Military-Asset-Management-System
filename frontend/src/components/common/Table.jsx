@@ -56,9 +56,7 @@ export const TableCell = ({ children, className = '', ...props }) => {
   );
 };
 
-// Main Table component with data handling
 const DefaultTable = ({ columns, data, emptyMessage = "No data available", loading = false }) => {
-  // FIX: Add validation for data prop
   const validData = Array.isArray(data) ? data : [];
   const validColumns = Array.isArray(columns) ? columns : [];
 

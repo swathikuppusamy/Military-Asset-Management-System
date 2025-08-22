@@ -18,32 +18,26 @@ const UsersList = () => {
     try {
       const response = await usersAPI.getAll();
       
-      // Fix: Handle Axios response structure
       console.log('Full response:', response);
       console.log('Response data:', response.data);
       
       let usersData = response.data;
       
-      // Check if response.data is directly an array
       if (Array.isArray(usersData)) {
         setUsers(usersData);
       }
-      // Check if response.data has a users property that's an array
       else if (usersData && Array.isArray(usersData.users)) {
         setUsers(usersData.users);
       }
-      // Check if response.data has a data property that's an array
       else if (usersData && Array.isArray(usersData.data)) {
         setUsers(usersData.data);
       }
-      // Check other common patterns
       else if (usersData && Array.isArray(usersData.items)) {
         setUsers(usersData.items);
       }
       else if (usersData && Array.isArray(usersData.results)) {
         setUsers(usersData.results);
       }
-      // Fallback: set empty array and log the structure
       else {
         console.log('Response.data structure:', Object.keys(usersData || {}));
         setUsers([]);
@@ -53,7 +47,7 @@ const UsersList = () => {
     } catch (error) {
       setError('Failed to fetch users');
       console.error('Error fetching users:', error);
-      setUsers([]); // Ensure users is always an array
+      setUsers([]); 
     } finally {
       setLoading(false);
     }
@@ -68,14 +62,12 @@ const UsersList = () => {
     try {
       const response = await usersAPI.toggleStatus(id);
       
-      // Update the user in the local state
       setUsers(users.map(user => 
         user._id === id 
           ? { ...user, isActive: !currentStatus }
           : user
       ));
       
-      // Show success message
       setError('');
       console.log(`User ${action}d successfully`);
       

@@ -31,22 +31,20 @@ const ExpenditureForm = () => {
         basesAPI.getAll()
       ]);
       
-      // Handle the nested API response structure
-      console.log('Assets response:', assetsResponse.data); // Debug log
-      console.log('Bases response:', basesResponse.data); // Debug log
+      console.log('Assets response:', assetsResponse.data); 
+      console.log('Bases response:', basesResponse.data); 
       
       const assetsData = assetsResponse.data?.data?.assets || assetsResponse.data?.data || assetsResponse.data || [];
       const basesData = basesResponse.data?.data?.bases || basesResponse.data?.data || basesResponse.data || [];
       
-      console.log('Processed assets:', assetsData); // Debug log
-      console.log('Processed bases:', basesData); // Debug log
+      console.log('Processed assets:', assetsData); 
+      console.log('Processed bases:', basesData); 
       
       setAssets(Array.isArray(assetsData) ? assetsData : []);
       setBases(Array.isArray(basesData) ? basesData : []);
       
     } catch (error) {
       console.error('Error loading form data:', error);
-      // Set empty arrays as fallback
       setAssets([]);
       setBases([]);
     }
@@ -55,11 +53,10 @@ const ExpenditureForm = () => {
   const checkAvailableQuantity = async () => {
     try {
       const response = await assetsAPI.getById(asset);
-      console.log('Asset quantity response:', response.data); // Debug log
+      console.log('Asset quantity response:', response.data);
       
-      // Handle the API response structure for single asset
       const assetData = response.data?.data?.asset || response.data?.data || response.data;
-      console.log('Asset data:', assetData); // Debug log
+      console.log('Asset data:', assetData); 
       
       setAvailableQuantity(assetData?.currentQuantity || 0);
     } catch (error) {
@@ -75,7 +72,6 @@ const ExpenditureForm = () => {
       navigate('/expenditures');
     } catch (error) {
       console.error('Error creating expenditure:', error);
-      // You might want to add user-friendly error handling here
     } finally {
       setLoading(false);
     }

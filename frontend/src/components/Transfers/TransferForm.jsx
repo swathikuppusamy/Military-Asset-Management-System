@@ -35,17 +35,14 @@ const TransferForm = () => {
       console.log('Assets Response:', assetsResponse.data);
       console.log('Bases Response:', basesResponse.data);
       
-      // Handle assets response: { status: 'success', data: { assets: [...] } }
       const assetsData = assetsResponse.data?.data?.assets || [];
       setAssets(Array.isArray(assetsData) ? assetsData : []);
       
-      // Handle bases response: { status: 'success', data: [...] }
       const basesData = basesResponse.data?.data || [];
       setBases(Array.isArray(basesData) ? basesData : []);
       
     } catch (error) {
       console.error('Error loading form data:', error);
-      // Ensure arrays are set even on error
       setAssets([]);
       setBases([]);
     }
@@ -56,7 +53,6 @@ const TransferForm = () => {
       const response = await assetsAPI.getById(asset);
       console.log('Single Asset Response:', response.data);
       
-      // Correct path: response.data.data.asset.currentQuantity
       const assetData = response.data?.data?.asset;
       const quantity = assetData?.currentQuantity || 0;
       
@@ -74,7 +70,6 @@ const TransferForm = () => {
     try {
       setLoading(true);
       
-      // Prepare the transfer data in the format expected by the backend
       const transferData = {
         asset: data.asset,
         quantity: parseInt(data.quantity),
@@ -89,7 +84,6 @@ const TransferForm = () => {
       navigate('/transfers');
     } catch (error) {
       console.error('Error creating transfer:', error);
-      // Add user-friendly error handling
       const errorMessage = error.response?.data?.message || 'Error creating transfer. Please try again.';
       alert(errorMessage);
     } finally {

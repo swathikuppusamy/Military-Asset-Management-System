@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-//const API_BASE_URL = 'https://military-asset-management-system-9u0c.onrender.com/api/v1'||'http://localhost:5000/api/v1';
+//const API_BASE_URL = 'http://localhost:5000/api/v1';
 const API_BASE_URL =
   window.location.hostname === "localhost"
     ? "http://localhost:5000/api/v1"
@@ -10,7 +10,6 @@ const api = axios.create({
   baseURL: API_BASE_URL,
 });
 
-// Add token to requests
 api.interceptors.request.use((config) => {
   const token = localStorage.getItem('token');
   if (token) {
@@ -19,7 +18,6 @@ api.interceptors.request.use((config) => {
   return config;
 });
 
-// Handle authentication errors
 api.interceptors.response.use(
   (response) => response,
   (error) => {
@@ -74,7 +72,6 @@ export const assignmentsAPI = {
   expend: (id) => api.patch(`/assignments/${id}/expend`),
 };
 
-// Add to frontend/src/services/api.js
 export const expendituresAPI = {
   getAll: (filters) => api.get('/expenditures', { params: filters }),
   getById: (id) => api.get(`/expenditures/${id}`),
@@ -84,7 +81,6 @@ export const expendituresAPI = {
   approve: (id) => api.patch(`/expenditures/${id}/approve`),
   getStats: () => api.get('/expenditures/stats'),
 };
-// In services/api.js
 export const dashboardAPI = {
   getMetrics: (filters) => {
     const params = new URLSearchParams();

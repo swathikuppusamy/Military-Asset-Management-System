@@ -12,7 +12,7 @@ const Dashboard = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [filters, setFilters] = useState({
-    startDate: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000), // 30 days ago
+    startDate: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000), 
     endDate: new Date(),
     base: '',
     assetType: ''
@@ -37,7 +37,6 @@ const Dashboard = () => {
     console.log('Metrics response:', metricsResponse);
     console.log('Charts response:', chartsResponse);
     
-    // Handle metrics response
     if (metricsResponse.status === 'fulfilled') {
       const metricsData = metricsResponse.value?.data?.data || metricsResponse.value?.data || null;
       setMetrics(metricsData);
@@ -46,7 +45,6 @@ const Dashboard = () => {
       setError(prev => prev + ' Failed to load metrics. ');
     }
     
-    // Handle charts response
     if (chartsResponse.status === 'fulfilled') {
       const chartsDataResult = chartsResponse.value?.data?.data || chartsResponse.value?.data || null;
       setChartsData(chartsDataResult);

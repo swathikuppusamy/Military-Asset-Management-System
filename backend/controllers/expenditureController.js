@@ -1,22 +1,18 @@
-// backend/controllers/expenditureController.js
 const Expenditure = require('../models/Expenditure');
 const Asset = require('../models/Asset');
 const catchAsync = require('../utils/catchAsync');
 const AppError = require('../utils/appError');
 
-// Get all expenditures with filtering and pagination
 exports.getAllExpenditures = catchAsync(async (req, res, next) => {
   const { page = 1, limit = 10, asset, base, reason, startDate, endDate, approved } = req.query;
   
   let filter = {};
   
-  // Apply filters
   if (asset) filter.asset = asset;
   if (base) filter.base = base;
   if (reason) filter.reason = reason;
   if (approved !== undefined) filter.approved = approved === 'true';
   
-  // Date range filter
   if (startDate || endDate) {
     filter.expendedDate = {};
     if (startDate) filter.expendedDate.$gte = new Date(startDate);
@@ -46,7 +42,6 @@ exports.getAllExpenditures = catchAsync(async (req, res, next) => {
   });
 });
 
-// Get single expenditure
 exports.getExpenditure = catchAsync(async (req, res, next) => {
   const expenditure = await Expenditure.findById(req.params.id)
     .populate('asset', 'name serialNumber assetType')
@@ -64,11 +59,9 @@ exports.getExpenditure = catchAsync(async (req, res, next) => {
   });
 });
 
-// Create new expenditure
 exports.createExpenditure = catchAsync(async (req, res, next) => {
   const { asset, quantity } = req.body;
   
-  // Check if asset exists and has sufficient quantity
   const assetDoc = await Asset.findById(asset);
   if (!assetDoc) {
     return next(new AppError('Asset not found', 404));
@@ -108,7 +101,6 @@ exports.updateExpenditure = catchAsync(async (req, res, next) => {
     return next(new AppError('No expenditure found with that ID', 404));
   }
   
-  // Only allow updates if not approved or user is admin
   if (expenditure.approved && req.user.role !== 'admin') {
     return next(new AppError('Cannot update approved expenditure', 403));
   }
@@ -165,12 +157,10 @@ exports.deleteExpenditure = catchAsync(async (req, res, next) => {
     return next(new AppError('No expenditure found with that ID', 404));
   }
   
-  // Only allow deletion if not approved or user is admin
   if (expenditure.approved && req.user.role !== 'admin') {
     return next(new AppError('Cannot delete approved expenditure', 403));
   }
   
-  // Restore asset quantity
   const asset = await Asset.findById(expenditure.asset);
   if (asset) {
     asset.quantity += expenditure.quantity;
@@ -185,7 +175,7 @@ exports.deleteExpenditure = catchAsync(async (req, res, next) => {
   });
 });
 
-// Get expenditure statistics
+
 exports.getExpenditureStats = catchAsync(async (req, res, next) => {
   const stats = await Expenditure.aggregate([
     {

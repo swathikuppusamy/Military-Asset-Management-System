@@ -1,10 +1,8 @@
 import React, { createContext, useState, useContext, useEffect } from 'react';
 import { authAPI } from '../services/api';
 
-// Create the context
 const AuthContext = createContext();
 
-// Custom hook to use auth context
 export const useAuth = () => {
   const context = useContext(AuthContext);
   if (!context) {
@@ -13,13 +11,11 @@ export const useAuth = () => {
   return context;
 };
 
-// AuthProvider component
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [token, setToken] = useState(localStorage.getItem('token'));
 
-  // Check if user is authenticated on app load
   useEffect(() => {
     const checkAuth = async () => {
       const storedToken = localStorage.getItem('token');
@@ -53,7 +49,6 @@ export const AuthProvider = ({ children }) => {
       if (response.data.status === 'success') {
         const { token: newToken, data } = response.data;
         
-        // Store token in localStorage
         localStorage.setItem('token', newToken);
         setToken(newToken);
         setUser(data.user);
@@ -84,7 +79,6 @@ export const AuthProvider = ({ children }) => {
       if (response.data.status === 'success') {
         const { token: newToken, data } = response.data;
         
-        // Store token in localStorage
         localStorage.setItem('token', newToken);
         setToken(newToken);
         setUser(data.user);

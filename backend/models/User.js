@@ -18,7 +18,7 @@ const userSchema = new mongoose.Schema({
   },
   role: {
     type: String,
-    enum: ['admin', 'commander', 'logistics', 'unit_leader'], // Make sure unit_leader is included
+    enum: ['admin', 'commander', 'logistics', 'unit_leader'], 
     required: true
   },
   base: {
@@ -38,7 +38,6 @@ const userSchema = new mongoose.Schema({
   toObject: { virtuals: true }
 });
 
-// Virtual field for name (maps to username for frontend compatibility)
 userSchema.virtual('name').get(function() {
   return this.username;
 });

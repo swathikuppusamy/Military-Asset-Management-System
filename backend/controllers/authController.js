@@ -21,7 +21,6 @@ const createSendToken = (user, statusCode, res) => {
 
   res.cookie('jwt', token, cookieOptions);
 
-  // Remove password from output
   user.password = undefined;
 
   res.status(statusCode).json({
@@ -35,11 +34,10 @@ const createSendToken = (user, statusCode, res) => {
 
 exports.signup = async (req, res) => {
   try {
-    console.log('Signup request received:', req.body); // Debug log
+    console.log('Signup request received:', req.body);
     
     const { username, email, password, role, base } = req.body;
 
-    // Check for required fields
     if (!username || !email || !password || !role) {
       console.log('Missing required fields:', { username: !!username, email: !!email, password: !!password, role: !!role });
       return res.status(400).json({
@@ -48,7 +46,6 @@ exports.signup = async (req, res) => {
       });
     }
 
-    // Check if user already exists
     const existingUser = await User.findOne({ $or: [{ email }, { username }] });
     if (existingUser) {
       console.log('User already exists:', { email, username });
@@ -58,7 +55,6 @@ exports.signup = async (req, res) => {
       });
     }
 
-    // Verify base exists if role requires it
     if (role !== 'admin') {
       if (!base) {
         console.log('Base is required for role:', role);
@@ -93,10 +89,9 @@ exports.signup = async (req, res) => {
 
     createSendToken(newUser, 201, res);
   } catch (error) {
-    console.error('Signup error details:', error); // More detailed error logging
+    console.error('Signup error details:', error);
     logger.error(`Signup error: ${error.message}`);
     
-    // Handle validation errors
     if (error.name === 'ValidationError') {
       const errors = Object.values(error.errors).map(err => err.message);
       return res.status(400).json({
@@ -106,7 +101,6 @@ exports.signup = async (req, res) => {
       });
     }
 
-    // Handle duplicate key errors
     if (error.code === 11000) {
       const field = Object.keys(error.keyValue)[0];
       return res.status(400).json({
@@ -127,7 +121,6 @@ exports.login = async (req, res) => {
   try {
     const { username, password } = req.body;
 
-    // 1) Check if username and password exist
     if (!username || !password) {
       return res.status(400).json({
         status: 'error',
@@ -135,7 +128,6 @@ exports.login = async (req, res) => {
       });
     }
 
-    // 2) Check if user exists && password is correct
     const user = await User.findOne({ username }).select('+password').populate('base');
     if (!user || !(await user.correctPassword(password, user.password))) {
       return res.status(401).json({
@@ -144,7 +136,6 @@ exports.login = async (req, res) => {
       });
     }
 
-    // 3) Check if user is active
     if (!user.isActive) {
       return res.status(401).json({
         status: 'error',
@@ -152,7 +143,6 @@ exports.login = async (req, res) => {
       });
     }
 
-    // 4) If everything ok, send token to client
     createSendToken(user, 200, res);
   } catch (error) {
     logger.error(`Login error: ${error.message}`);
@@ -165,7 +155,6 @@ exports.login = async (req, res) => {
 
 exports.protect = async (req, res, next) => {
   try {
-    // 1) Getting token and check if it's there
     let token;
     if (
       req.headers.authorization &&
@@ -181,10 +170,8 @@ exports.protect = async (req, res, next) => {
       });
     }
 
-    // 2) Verification token
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
-    // 3) Check if user still exists
     const currentUser = await User.findById(decoded.id).populate('base');
     if (!currentUser) {
       return res.status(401).json({
@@ -193,10 +180,6 @@ exports.protect = async (req, res, next) => {
       });
     }
 
-    // 4) Check if user changed password after the token was issued
-    // (We would need to add a passwordChangedAt field to the User model for this)
-
-    // GRANT ACCESS TO PROTECTED ROUTE
     req.user = currentUser;
     next();
   } catch (error) {

@@ -13,25 +13,21 @@ const AssetTypeFilter = ({ filters, onChange }) => {
     try {
       const response = await assetTypesAPI.getAll();
       
-      // Handle different response structures (same pattern as BaseFilter)
       let assetTypesData = [];
       
       if (response.data && response.data.data) {
-        // If API returns { status: 'success', data: [...] }
         assetTypesData = Array.isArray(response.data.data) ? response.data.data : [];
       } else if (Array.isArray(response.data)) {
-        // If API returns [...] directly
         assetTypesData = response.data;
       } else if (response.data && Array.isArray(response.data.assetTypes)) {
-        // If API returns { assetTypes: [...] }
         assetTypesData = response.data.assetTypes;
       }
       
-      console.log('Asset types data received:', assetTypesData); // Debug log
+      console.log('Asset types data received:', assetTypesData);
       setAssetTypes(assetTypesData);
     } catch (error) {
       console.error('Error loading asset types:', error);
-      setAssetTypes([]); // Ensure assetTypes is always an array
+      setAssetTypes([]);
     } finally {
       setLoading(false);
     }

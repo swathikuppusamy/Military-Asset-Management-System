@@ -34,12 +34,10 @@ const UserForm = () => {
   const fetchBases = async () => {
     try {
       const response = await settingsAPI.getBases();
-      console.log('Bases API response:', response); // Debug log
+      console.log('Bases API response:', response);
       
-      // Handle the nested response structure: response.data.data
       const basesData = response.data?.data || [];
       
-      // Ensure we always have an array
       if (Array.isArray(basesData)) {
         setBases(basesData);
       } else {
@@ -49,7 +47,7 @@ const UserForm = () => {
       }
     } catch (error) {
       console.error('Error fetching bases:', error);
-      setBases([]); // Ensure bases is always an array
+      setBases([]); 
       setError('Failed to load bases');
     }
   };
@@ -58,10 +56,10 @@ const UserForm = () => {
     try {
       setLoading(true);
       const response = await usersAPI.getById(id);
-      const user = response.data?.data || response.data; // Handle both response structures
+      const user = response.data?.data || response.data; 
       
       setFormData({
-        name: user.username || user.name, // Handle both username and name fields
+        name: user.username || user.name, 
         email: user.email,
         role: user.role,
         base: user.base?._id || '',
@@ -132,15 +130,15 @@ const UserForm = () => {
 
     try {
       const userData = {
-        name: formData.name, // This will be mapped to username in the backend
+        name: formData.name, 
         email: formData.email,
         role: formData.role,
-        base: formData.base || undefined, // Send undefined instead of empty string
+        base: formData.base || undefined, 
         isActive: formData.isActive,
         ...(formData.password && { password: formData.password })
       };
 
-      console.log('Sending user data:', userData); // Debug log
+      console.log('Sending user data:', userData); 
 
       if (isEdit) {
         await usersAPI.update(id, userData);
@@ -154,7 +152,7 @@ const UserForm = () => {
         navigate('/users');
       }, 1000);
     } catch (error) {
-      console.error('Submit error:', error); // Debug log
+      console.error('Submit error:', error); 
       const errorMessage = error.response?.data?.message || `Failed to ${isEdit ? 'update' : 'create'} user`;
       setError(errorMessage);
     } finally {
@@ -162,7 +160,6 @@ const UserForm = () => {
     }
   };
 
-  // Show loading state while fetching data
   if (loading && isEdit) {
     return (
       <div className="max-w-2xl mx-auto">

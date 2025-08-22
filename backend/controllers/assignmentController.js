@@ -8,7 +8,6 @@ exports.getAllAssignments = async (req, res) => {
     const { base, status, assetType, startDate, endDate } = req.query;
     let filter = {};
 
-    // Apply role-based filtering
     if (req.user.role !== 'admin') {
       filter.base = req.user.base._id;
     } else if (base) {
@@ -17,14 +16,12 @@ exports.getAllAssignments = async (req, res) => {
 
     if (status) filter.status = status;
     
-    // Date filtering
     if (startDate || endDate) {
       filter.assignmentDate = {};
       if (startDate) filter.assignmentDate.$gte = new Date(startDate);
       if (endDate) filter.assignmentDate.$lte = new Date(endDate);
     }
 
-    // Asset type filtering
     if (assetType) {
       const assets = await Asset.find({ assetType });
       filter.asset = { $in: assets.map(asset => asset._id) };
@@ -64,7 +61,6 @@ exports.getAssignment = async (req, res) => {
       });
     }
 
-    // Check if user has access to this assignment
     if (req.user.role !== 'admin' && !assignment.base._id.equals(req.user.base._id)) {
       return res.status(403).json({
         status: 'error',
@@ -102,7 +98,6 @@ exports.createAssignment = async (req, res) => {
 
     console.log('Creating assignment with data:', req.body);
 
-    // Verify asset exists
     const assetDoc = await Asset.findById(asset);
     if (!assetDoc) {
       return res.status(400).json({
@@ -111,7 +106,6 @@ exports.createAssignment = async (req, res) => {
       });
     }
 
-    // Verify base exists
     let baseDoc;
     if (base) {
       baseDoc = await Base.findById(base);
@@ -125,7 +119,6 @@ exports.createAssignment = async (req, res) => {
       baseDoc = await Base.findById(req.user.base._id);
     }
 
-    // Check if user has access to the base
     if (req.user.role !== 'admin' && !baseDoc._id.equals(req.user.base._id)) {
       return res.status(403).json({
         status: 'error',
@@ -133,7 +126,6 @@ exports.createAssignment = async (req, res) => {
       });
     }
 
-    // Check available quantity
     const availableQuantity = assetDoc.currentQuantity !== undefined ? 
       assetDoc.currentQuantity : assetDoc.quantity;
     
@@ -144,7 +136,6 @@ exports.createAssignment = async (req, res) => {
       });
     }
 
-    // Generate assignment ID
     const assignmentId = `ASN-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
 
     const newAssignment = await Assignment.create({
@@ -162,7 +153,6 @@ exports.createAssignment = async (req, res) => {
       purpose
     });
 
-    // Update asset quantity
     if (assetDoc.currentQuantity !== undefined) {
       assetDoc.currentQuantity -= quantity;
     } else {
@@ -170,7 +160,6 @@ exports.createAssignment = async (req, res) => {
     }
     await assetDoc.save();
 
-    // Populate the created assignment
     const populatedAssignment = await Assignment.findById(newAssignment._id)
       .populate('asset')
       .populate('base')
@@ -202,7 +191,6 @@ exports.updateAssignment = async (req, res) => {
       });
     }
 
-    // Check if user has access to this assignment
     if (req.user.role !== 'admin' && !assignment.base.equals(req.user.base._id)) {
       return res.status(403).json({
         status: 'error',
@@ -231,6 +219,7 @@ exports.updateAssignment = async (req, res) => {
     });
   }
 };
+
 exports.returnAssignment = async (req, res) => {
   try {
     console.log('=== Return Assignment Debug Start ===');
@@ -241,7 +230,6 @@ exports.returnAssignment = async (req, res) => {
       base: req.user.base
     });
 
-    // Step 1: Find the assignment
     console.log('Step 1: Finding assignment...');
     const assignment = await Assignment.findById(req.params.id);
     
@@ -260,7 +248,6 @@ exports.returnAssignment = async (req, res) => {
       asset: assignment.asset
     });
 
-    // Step 2: Populate the assignment
     console.log('Step 2: Populating assignment...');
     await assignment.populate(['asset', 'base']);
     
@@ -269,14 +256,11 @@ exports.returnAssignment = async (req, res) => {
       base: assignment.base ? { id: assignment.base._id, name: assignment.base.name } : null
     });
 
-    // Step 3: Check permissions - FIXED to handle missing user.base
     console.log('Step 3: Checking permissions...');
     
-    // For admin users or when user.base is undefined, skip base permission check
     if (req.user.role === 'admin') {
       console.log('Admin user - skipping base permission check');
     } else {
-      // Check if user has a base assigned
       if (!req.user.base || !req.user.base._id) {
         console.log('Error: User has no base assigned');
         return res.status(403).json({
@@ -285,7 +269,6 @@ exports.returnAssignment = async (req, res) => {
         });
       }
 
-      // Check if user's base matches assignment's base
       const assignmentBaseId = assignment.base._id.toString();
       const userBaseId = req.user.base._id.toString();
       console.log('Base comparison:', { assignmentBaseId, userBaseId });
@@ -299,7 +282,6 @@ exports.returnAssignment = async (req, res) => {
       }
     }
 
-    // Step 4: Check status
     console.log('Step 4: Checking assignment status...');
     if (assignment.status !== 'active') {
       console.log('Assignment not active, current status:', assignment.status);
@@ -309,14 +291,12 @@ exports.returnAssignment = async (req, res) => {
       });
     }
 
-    // Step 5: Update assignment
     console.log('Step 5: Updating assignment status...');
     assignment.status = 'returned';
     assignment.actualReturnDate = new Date();
     await assignment.save();
     console.log('Assignment status updated successfully');
 
-    // Step 6: Update asset quantity
     console.log('Step 6: Updating asset quantity...');
     const asset = assignment.asset;
     console.log('Asset before update:', {
@@ -326,7 +306,6 @@ exports.returnAssignment = async (req, res) => {
       assignmentQuantity: assignment.quantity
     });
 
-    // Return quantity to asset
     if (typeof asset.currentQuantity === 'number') {
       asset.currentQuantity += assignment.quantity;
       console.log('Updated currentQuantity to:', asset.currentQuantity);
@@ -340,7 +319,6 @@ exports.returnAssignment = async (req, res) => {
     await asset.save();
     console.log('Asset quantity updated successfully');
 
-    // Step 7: Return populated assignment
     console.log('Step 7: Returning populated assignment...');
     const populatedAssignment = await Assignment.findById(assignment._id)
       .populate('asset')
@@ -382,7 +360,6 @@ exports.expendAssignment = async (req, res) => {
       base: req.user.base
     });
 
-    // Step 1: Find the assignment
     console.log('Step 1: Finding assignment...');
     const assignment = await Assignment.findById(req.params.id);
     
@@ -400,18 +377,14 @@ exports.expendAssignment = async (req, res) => {
       base: assignment.base
     });
 
-    // Step 2: Populate the assignment
     console.log('Step 2: Populating assignment...');
     await assignment.populate(['asset', 'base']);
 
-    // Step 3: Check permissions - FIXED to handle missing user.base
     console.log('Step 3: Checking permissions...');
     
-    // For admin users or when user.base is undefined, skip base permission check
     if (req.user.role === 'admin') {
       console.log('Admin user - skipping base permission check');
     } else {
-      // Check if user has a base assigned
       if (!req.user.base || !req.user.base._id) {
         console.log('Error: User has no base assigned');
         return res.status(403).json({
@@ -420,7 +393,6 @@ exports.expendAssignment = async (req, res) => {
         });
       }
 
-      // Check if user's base matches assignment's base
       const assignmentBaseId = assignment.base._id.toString();
       const userBaseId = req.user.base._id.toString();
       console.log('Base comparison:', { assignmentBaseId, userBaseId });
@@ -434,7 +406,6 @@ exports.expendAssignment = async (req, res) => {
       }
     }
 
-    // Step 4: Check status
     console.log('Step 4: Checking assignment status...');
     if (assignment.status !== 'active') {
       console.log('Assignment not active, current status:', assignment.status);
@@ -444,14 +415,12 @@ exports.expendAssignment = async (req, res) => {
       });
     }
 
-    // Step 5: Update assignment (no quantity return for expended items)
     console.log('Step 5: Updating assignment status to expended...');
     assignment.status = 'expended';
     assignment.actualReturnDate = new Date();
     await assignment.save();
     console.log('Assignment status updated successfully');
 
-    // Step 6: Return populated assignment
     console.log('Step 6: Returning populated assignment...');
     const populatedAssignment = await Assignment.findById(assignment._id)
       .populate('asset')

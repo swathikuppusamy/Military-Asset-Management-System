@@ -11,16 +11,13 @@ exports.getDashboardMetrics = async (req, res) => {
     let filter = {};
     let dateFilter = {};
 
-    // Apply role-based filtering
     if (req.user.role !== 'admin') {
       filter.base = req.user.base._id;
     } else if (base && base.trim() !== '') {
-      // Validate base ObjectId before using it
       if (mongoose.Types.ObjectId.isValid(base)) {
         filter.base = base;
       } else {
         logger.warn(`Invalid base ObjectId received: ${base}`);
-        // Skip invalid base filter or return error
         return res.status(400).json({
           status: 'error',
           message: 'Invalid base ID provided'
@@ -28,13 +25,11 @@ exports.getDashboardMetrics = async (req, res) => {
       }
     }
 
-    // Validate assetType ObjectId before using it
     if (assetType && assetType.trim() !== '') {
       if (mongoose.Types.ObjectId.isValid(assetType)) {
         filter.type = assetType;
       } else {
         logger.warn(`Invalid assetType ObjectId received: ${assetType}`);
-        // Skip invalid assetType filter or return error
         return res.status(400).json({
           status: 'error',
           message: 'Invalid asset type ID provided'
@@ -42,7 +37,6 @@ exports.getDashboardMetrics = async (req, res) => {
       }
     }
 
-    // Date filtering
     if (startDate || endDate) {
       dateFilter = {
         createdAt: {}
@@ -51,14 +45,12 @@ exports.getDashboardMetrics = async (req, res) => {
       if (endDate) dateFilter.createdAt.$lte = new Date(endDate);
     }
 
-    console.log('Dashboard metrics filter:', filter); // Debug log
+    console.log('Dashboard metrics filter:', filter); 
 
-    // Get assets with current quantities
     const assets = await Asset.find(filter)
       .populate('type')
       .populate('base');
 
-    // Calculate opening and closing balances
     let openingBalance = 0;
     let closingBalance = 0;
 
@@ -67,7 +59,6 @@ exports.getDashboardMetrics = async (req, res) => {
       closingBalance += asset.currentQuantity;
     });
 
-    // Get purchases within date range
     const purchaseFilter = { ...filter };
     if (startDate || endDate) {
       purchaseFilter.purchaseDate = {};
@@ -78,7 +69,6 @@ exports.getDashboardMetrics = async (req, res) => {
     const purchases = await Purchase.find(purchaseFilter);
     const totalPurchases = purchases.reduce((sum, purchase) => sum + purchase.quantity, 0);
 
-    // Get transfers - Apply same ObjectId validation
     let transferFilter = {};
     if (req.user.role !== 'admin') {
       transferFilter.$or = [
@@ -119,13 +109,10 @@ exports.getDashboardMetrics = async (req, res) => {
           transfersOut += transfer.quantity;
         }
       } else {
-        // For admin without base filter, we need a different approach
-        // This is a simplified version
         transfersIn += transfer.quantity;
       }
     });
 
-    // Get assignments - Apply same ObjectId validation
     const assignmentFilter = { ...filter };
     if (startDate || endDate) {
       assignmentFilter.assignmentDate = {};
@@ -136,7 +123,6 @@ exports.getDashboardMetrics = async (req, res) => {
     const assignments = await Assignment.find(assignmentFilter);
     const totalAssigned = assignments.reduce((sum, assignment) => sum + assignment.quantity, 0);
 
-    // Calculate net movement
     const netMovement = totalPurchases + transfersIn - transfersOut;
 
     res.status(200).json({
@@ -167,7 +153,6 @@ exports.getNetMovementDetails = async (req, res) => {
     const { startDate, endDate, base } = req.query;
     let filter = {};
 
-    // Apply role-based filtering with ObjectId validation
     if (req.user.role !== 'admin') {
       filter.base = req.user.base._id;
     } else if (base && base.trim() !== '') {
@@ -182,7 +167,6 @@ exports.getNetMovementDetails = async (req, res) => {
       }
     }
 
-    // Date filtering for purchases
     let purchaseDateFilter = {};
     if (startDate || endDate) {
       purchaseDateFilter.purchaseDate = {};
@@ -190,13 +174,11 @@ exports.getNetMovementDetails = async (req, res) => {
       if (endDate) purchaseDateFilter.purchaseDate.$lte = new Date(endDate);
     }
 
-    // Get purchases with details
     const purchases = await Purchase.find({ ...filter, ...purchaseDateFilter })
       .populate('assetType')
       .populate('base')
       .sort({ purchaseDate: -1 });
 
-    // Get transfers with details - Apply same ObjectId validation
     let transferFilter = {};
     if (req.user.role !== 'admin') {
       transferFilter.$or = [
@@ -222,7 +204,6 @@ exports.getNetMovementDetails = async (req, res) => {
       .populate('toBase')
       .sort({ transferDate: -1 });
 
-    // Separate transfers in and out
     const transfersIn = transfers.filter(transfer => {
       if (req.user.role !== 'admin') {
         return transfer.toBase._id.equals(req.user.base._id);
@@ -262,7 +243,6 @@ exports.getChartsData = async (req, res) => {
     const { startDate, endDate, base, assetType } = req.query;
     let filter = {};
 
-    // Apply role-based filtering
     if (req.user.role !== 'admin') {
       filter.base = req.user.base._id;
     } else if (base && base.trim() !== '') {
@@ -276,7 +256,6 @@ exports.getChartsData = async (req, res) => {
       }
     }
 
-    // Validate assetType ObjectId
     if (assetType && assetType.trim() !== '') {
       if (mongoose.Types.ObjectId.isValid(assetType)) {
         filter.type = new mongoose.Types.ObjectId(assetType);
@@ -288,9 +267,8 @@ exports.getChartsData = async (req, res) => {
       }
     }
 
-    console.log('Charts filter:', filter); // Debug log
+    console.log('Charts filter:', filter); 
 
-    // 1. Asset Distribution by Type
     const assetDistribution = await Asset.aggregate([
       { $match: filter },
       {
@@ -316,11 +294,9 @@ exports.getChartsData = async (req, res) => {
       }
     ]);
 
-    // 2. Monthly Movement Data
     const start = new Date(startDate || Date.now() - 30 * 24 * 60 * 60 * 1000);
     const end = new Date(endDate || Date.now());
 
-    // Get purchases
     const purchaseFilter = { ...filter };
     purchaseFilter.purchaseDate = { $gte: start, $lte: end };
 
@@ -338,7 +314,6 @@ exports.getChartsData = async (req, res) => {
       { $sort: { '_id.year': 1, '_id.month': 1 } }
     ]);
 
-    // Get transfers - Fixed the aggregation pipeline
     let transferFilter = {};
     let userBaseId = null;
     let selectedBaseId = null;
@@ -417,11 +392,9 @@ exports.getChartsData = async (req, res) => {
       { $sort: { '_id.year': 1, '_id.month': 1 } }
     ]);
 
-    // Create a complete monthly data set by merging purchase and transfer data
     const monthlyMovementMap = new Map();
     const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
-    // Add purchase data
     purchasesByMonth.forEach(purchase => {
       const key = `${purchase._id.year}-${purchase._id.month}`;
       const monthLabel = `${monthNames[purchase._id.month - 1]} ${purchase._id.year}`;
@@ -433,7 +406,6 @@ exports.getChartsData = async (req, res) => {
       });
     });
 
-    // Add transfer data
     transfersByMonth.forEach(transfer => {
       const key = `${transfer._id.year}-${transfer._id.month}`;
       const monthLabel = `${monthNames[transfer._id.month - 1]} ${transfer._id.year}`;
@@ -452,7 +424,6 @@ exports.getChartsData = async (req, res) => {
       }
     });
 
-    // Convert map to sorted array
     const monthlyMovement = Array.from(monthlyMovementMap.values())
       .sort((a, b) => {
         const [monthA, yearA] = a.month.split(' ');
@@ -462,7 +433,6 @@ exports.getChartsData = async (req, res) => {
         return monthNames.indexOf(monthA) - monthNames.indexOf(monthB);
       });
 
-    // 3. Status Distribution
     const statusDistribution = await Asset.aggregate([
       { $match: filter },
       {

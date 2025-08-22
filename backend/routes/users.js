@@ -12,7 +12,6 @@ const { restrictTo } = require('../middleware/rbac');
 
 const router = express.Router();
 
-// All routes are protected
 router.use(protect);
 
 // Admin only routes
@@ -27,7 +26,6 @@ router
   .put(restrictTo('admin'), updateUser)
   .delete(restrictTo('admin'), deleteUser);
 
-// New route for toggling user status
 router
   .route('/:id/toggle-status')
   .patch(restrictTo('admin'), toggleUserStatus);

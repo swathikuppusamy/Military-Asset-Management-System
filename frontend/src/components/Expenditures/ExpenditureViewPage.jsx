@@ -23,7 +23,6 @@ const ExpenditureViewPage = () => {
       const response = await expendituresAPI.getById(id);
       console.log('Expenditure response:', response.data);
       
-      // Handle the correct response structure
       const expenditureData = response.data.data || response.data;
       console.log('Processed expenditure:', expenditureData);
       
@@ -48,15 +47,13 @@ const ExpenditureViewPage = () => {
       const response = await expendituresAPI.approve(id);
       console.log('Approve response:', response);
       
-      await loadExpenditure(); // Refresh the data
+      await loadExpenditure(); 
       
-      // Show success message
       alert('Expenditure approved successfully!');
       
     } catch (error) {
       console.error('Error approving expenditure:', error);
       
-      // More detailed error handling
       const errorMessage = error.response?.data?.message || 
                           error.message || 
                           'Error approving expenditure. Please try again.';
@@ -78,15 +75,13 @@ const ExpenditureViewPage = () => {
       const response = await expendituresAPI.reject(id);
       console.log('Reject response:', response);
       
-      await loadExpenditure(); // Refresh the data
+      await loadExpenditure(); 
       
-      // Show success message
       alert('Expenditure rejected successfully!');
       
     } catch (error) {
       console.error('Error rejecting expenditure:', error);
       
-      // More detailed error handling
       const errorMessage = error.response?.data?.message || 
                           error.message || 
                           'Error rejecting expenditure. Please try again.';

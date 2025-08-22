@@ -3,7 +3,7 @@ const { protect } = require('../middleware/auth');
 const {
   getDashboardMetrics,
   getNetMovementDetails,
-  getChartsData // Add this import
+  getChartsData 
 } = require('../controllers/dashboardController');
 
 const router = express.Router();
@@ -18,7 +18,6 @@ router
   .route('/net-movement')
   .get(getNetMovementDetails);
 
-// Update this route to use the controller function
 router
   .route('/charts')
   .get(getChartsData);

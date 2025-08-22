@@ -21,8 +21,8 @@ router
 router
   .route('/:id')
   .get(getAsset)
-  .put(updateAsset)  // Changed from .patch() to .put()
-  .patch(updateAsset) // Keep both for compatibility
+  .put(updateAsset)  
+  .patch(updateAsset) 
   .delete(restrictTo('admin'), deleteAsset);
 
 module.exports = router;

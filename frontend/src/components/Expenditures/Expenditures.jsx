@@ -1,4 +1,3 @@
-// frontend/src/components/Expenditures/Expenditures.jsx
 import React from 'react';
 import ExpendituresList from './ExpendituresList';
 

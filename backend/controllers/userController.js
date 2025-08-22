@@ -107,14 +107,12 @@ exports.updateUser = async (req, res, next) => {
   try {
     const { name, username, password, ...updateData } = req.body;
 
-    // Handle name/username field mapping
     if (name && !username) {
       updateData.username = name;
     } else if (username) {
       updateData.username = username;
     }
 
-    // Don't allow password updates through this endpoint
     if (password) {
       return res.status(400).json({
         status: 'error',
@@ -152,7 +150,6 @@ exports.updateUser = async (req, res, next) => {
   }
 };
 
-// Toggle user status (activate/deactivate)
 exports.toggleUserStatus = async (req, res, next) => {
   try {
     const user = await User.findById(req.params.id);
@@ -164,7 +161,6 @@ exports.toggleUserStatus = async (req, res, next) => {
       });
     }
 
-    // Prevent deactivation of admin users (optional safety check)
     if (user.role === 'admin' && user.isActive) {
       return res.status(400).json({
         status: 'error',
@@ -172,11 +168,9 @@ exports.toggleUserStatus = async (req, res, next) => {
       });
     }
 
-    // Toggle the isActive status
     user.isActive = !user.isActive;
     await user.save();
 
-    // Populate base information and remove password
     await user.populate('base', 'name location');
     user.password = undefined;
 
@@ -193,7 +187,6 @@ exports.toggleUserStatus = async (req, res, next) => {
   }
 };
 
-// Delete user (keep this for complete removal if needed)
 exports.deleteUser = async (req, res, next) => {
   try {
     const user = await User.findById(req.params.id);
@@ -205,7 +198,6 @@ exports.deleteUser = async (req, res, next) => {
       });
     }
 
-    // Prevent deletion of admin users (optional safety check)
     if (user.role === 'admin') {
       return res.status(400).json({
         status: 'error',

@@ -6,7 +6,7 @@ import Card from '../common/Card';
 
 const PurchaseForm = () => {
   const navigate = useNavigate();
-  const { id } = useParams(); // Get the ID from URL params for edit mode
+  const { id } = useParams(); 
   const isEditMode = Boolean(id);
   
   const { register, handleSubmit, formState: { errors }, watch, setValue, reset } = useForm();
@@ -44,12 +44,10 @@ const PurchaseForm = () => {
         basesAPI.getAll()
       ]);
       
-      // Handle the nested data structure from API responses
       setAssetTypes(assetTypesResponse.data.data?.assetTypes || assetTypesResponse.data.data || assetTypesResponse.data || []);
       setBases(basesResponse.data.data?.bases || basesResponse.data.data || basesResponse.data || []);
     } catch (error) {
       console.error('Error loading form data:', error);
-      // Set empty arrays as fallback
       setAssetTypes([]);
       setBases([]);
     } finally {
@@ -63,7 +61,6 @@ const PurchaseForm = () => {
       const response = await purchasesAPI.getById(id);
       const purchase = response.data.data?.purchase || response.data.purchase || response.data;
       
-      // Populate form with existing purchase data
       const formData = {
         base: purchase.base?._id || purchase.base,
         assetType: purchase.assetType?._id || purchase.assetType,

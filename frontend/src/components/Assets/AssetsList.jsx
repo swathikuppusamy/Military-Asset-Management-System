@@ -22,18 +22,16 @@ const AssetsList = () => {
     try {
       setLoading(true);
 
-      // Create the correct filter params to match your backend expectations
       const filterParams = {};
       if (filters.base) filterParams.base = filters.base;
-      if (filters.assetType) filterParams.type = filters.assetType; // Backend expects 'type', not 'assetType'
+      if (filters.assetType) filterParams.type = filters.assetType; 
 
-      console.log('Sending filter params:', filterParams); // Debug log
+      console.log('Sending filter params:', filterParams); 
 
       const response = await assetsAPI.getAll(filterParams);
 
-      console.log('Full API response:', response); // Debug log
+      console.log('Full API response:', response); 
 
-      // Extract assets from the response structure
       let assetsData = [];
       if (response.data && response.data.data && response.data.data.assets) {
         assetsData = response.data.data.assets;
@@ -43,12 +41,12 @@ const AssetsList = () => {
         assetsData = response.data;
       }
 
-      console.log('Extracted assets data:', assetsData); // Debug log
-      console.log('First asset sample:', assetsData[0]); // Debug log to see structure
+      console.log('Extracted assets data:', assetsData); 
+      console.log('First asset sample:', assetsData[0]); 
       setAssets(assetsData);
     } catch (error) {
       console.error('Error loading assets:', error);
-      setAssets([]); // Ensure assets is always an array
+      setAssets([]); 
     } finally {
       setLoading(false);
     }

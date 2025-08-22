@@ -111,7 +111,7 @@ const TransfersList = () => {
   const handleApprove = async (transferId) => {
     try {
       await transfersAPI.approve(transferId);
-      loadTransfers(); // Reload to show updated status
+      loadTransfers();
     } catch (error) {
       console.error('Error approving transfer:', error);
       alert('Error approving transfer. Please try again.');
@@ -122,7 +122,7 @@ const TransfersList = () => {
     if (window.confirm('Are you sure you want to reject this transfer?')) {
       try {
         await transfersAPI.reject(transferId);
-        loadTransfers(); // Reload to show updated status
+        loadTransfers(); 
       } catch (error) {
         console.error('Error rejecting transfer:', error);
         alert('Error rejecting transfer. Please try again.');
@@ -134,7 +134,7 @@ const TransfersList = () => {
     if (window.confirm('Are you sure you want to cancel this transfer?')) {
       try {
         await transfersAPI.cancel(transferId);
-        loadTransfers(); // Reload to show updated status
+        loadTransfers();
       } catch (error) {
         console.error('Error cancelling transfer:', error);
         alert('Error cancelling transfer. Please try again.');

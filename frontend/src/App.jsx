@@ -8,14 +8,14 @@ import AssetsList from './components/Assets/AssetsList';
 import AssetForm from './components/Assets/AssetForm';
 import TransfersList from './components/Transfers/TransfersList';
 import TransferForm from './components/Transfers/TransferForm';
-import TransferView from './components/Transfers/TransferView';  // Add this import
+import TransferView from './components/Transfers/TransferView'; 
 import PurchasesList from './components/Purchases/PurchasesList';
 import PurchaseForm from './components/Purchases/PurchaseForm';
 import PurchaseView from './components/Purchases/PurchaseView';
 import AssignmentsList from './components/Assignments/AssignmentsList';
 import AssignmentForm from './components/Assignments/AssignmentForm';
 import AssignmentView from './components/Assignments/AssignmentView';
-import ExpendituresList from './components/Expenditures/ExpendituresList'; // Changed from Expenditures
+import ExpendituresList from './components/Expenditures/ExpendituresList'; 
 import ExpenditureForm from './components/Expenditures/ExpenditureForm';
 import ExpenditureViewPage from './components/Expenditures/ExpenditureViewPage';
 import UsersList from './components/Users/UsersList';
@@ -24,7 +24,6 @@ import Settings from './components/Settings/Settings';
 import Login from './components/Auth/Login';
 import Signup from './components/Auth/Signup';
 
-// Loading component
 function Loading() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50">
@@ -36,7 +35,6 @@ function Loading() {
   );
 }
 
-// Create a separate component for the authenticated app
 function AuthenticatedApp() {
   const [sidebarOpen, setSidebarOpen] = React.useState(false);
   const { user, loading } = useAuth();

@@ -34,7 +34,6 @@ const AssignmentsList = () => {
         status: filters.status
       };
 
-      // Remove empty filters
       Object.keys(params).forEach(key => {
         if (!params[key]) delete params[key];
       });
@@ -42,7 +41,6 @@ const AssignmentsList = () => {
       const response = await assignmentsAPI.getAll(params);
       console.log('Assignments response:', response.data);
       
-      // FIXED: Handle the correct response structure
       const assignmentsData = response.data.data || [];
       console.log('Processed assignments:', assignmentsData);
       

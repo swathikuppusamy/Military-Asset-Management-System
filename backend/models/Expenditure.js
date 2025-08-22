@@ -1,4 +1,3 @@
-// backend/models/Expenditure.js
 const mongoose = require('mongoose');
 
 const expenditureSchema = new mongoose.Schema({
@@ -57,7 +56,6 @@ const expenditureSchema = new mongoose.Schema({
   toObject: { virtuals: true }
 });
 
-// Virtual populate
 expenditureSchema.virtual('assetDetails', {
   ref: 'Asset',
   localField: 'asset',
@@ -86,7 +84,6 @@ expenditureSchema.virtual('approvedByDetails', {
   justOne: true
 });
 
-// Indexes
 expenditureSchema.index({ expendedDate: -1 });
 expenditureSchema.index({ asset: 1, expendedDate: -1 });
 expenditureSchema.index({ base: 1, expendedDate: -1 });

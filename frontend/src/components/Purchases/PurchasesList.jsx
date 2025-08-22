@@ -27,7 +27,6 @@ const PurchasesList = () => {
       setLoading(true);
       const response = await purchasesAPI.getAll(filters);
       
-      // Handle the nested data structure from API response
       const purchasesData = response.data.data?.purchases || response.data.data || response.data || [];
       setPurchases(purchasesData);
     } catch (error) {

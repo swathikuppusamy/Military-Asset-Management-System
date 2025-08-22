@@ -37,7 +37,7 @@ const transferSchema = new mongoose.Schema({
   },
   status: {
     type: String,
-    enum: ['pending', 'approved', 'rejected', 'completed', 'cancelled'], // Added 'cancelled'
+    enum: ['pending', 'approved', 'rejected', 'completed', 'cancelled'], 
     default: 'pending'
   },
   priority: {
@@ -54,7 +54,6 @@ const transferSchema = new mongoose.Schema({
   timestamps: true
 });
 
-// Index for better query performance
 transferSchema.index({ status: 1 });
 transferSchema.index({ fromBase: 1 });
 transferSchema.index({ toBase: 1 });

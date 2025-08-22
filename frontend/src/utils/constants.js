@@ -2,7 +2,6 @@ export const USER_ROLES = {
   ADMIN: 'admin',
   COMMANDER: 'commander',
   LOGISTICS: 'logistics',
-  UNIT_LEADER: 'unit_leader' // Added missing UNIT_LEADER role
 };
 
 export const ASSET_CATEGORIES = {
@@ -34,7 +33,6 @@ export const ASSIGNMENT_STATUS = {
   EXPENDED: 'expended'
 };
 
-// User role display names for UI
 export const USER_ROLE_LABELS = {
   [USER_ROLES.ADMIN]: 'Administrator',
   [USER_ROLES.COMMANDER]: 'Commander',

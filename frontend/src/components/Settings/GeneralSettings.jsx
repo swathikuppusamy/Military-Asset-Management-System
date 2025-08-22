@@ -15,8 +15,6 @@ const GeneralSettings = () => {
     try {
       const response = await settingsAPI.getGeneral();
       const settings = response.data;
-      
-      // Set form values from API response
       Object.keys(settings).forEach(key => {
         setValue(key, settings[key]);
       });

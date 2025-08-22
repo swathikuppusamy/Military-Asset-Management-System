@@ -9,11 +9,10 @@ exports.getAllAssets = async (req, res) => {
     const { base, type, status, assetType } = req.query;
     let filter = {};
 
-    // Apply role-based filtering
     if (req.user.role !== 'admin') {
       filter.base = req.user.base._id;
     } else if (base && base.trim() !== '') {
-      // Validate base ObjectId before using it
+      
       if (mongoose.Types.ObjectId.isValid(base)) {
         filter.base = base;
       } else {
@@ -25,7 +24,6 @@ exports.getAllAssets = async (req, res) => {
       }
     }
 
-    // Handle both 'type' and 'assetType' query parameters (for compatibility)
     const assetTypeFilter = type || assetType;
     if (assetTypeFilter && assetTypeFilter.trim() !== '') {
       if (mongoose.Types.ObjectId.isValid(assetTypeFilter)) {
@@ -43,7 +41,7 @@ exports.getAllAssets = async (req, res) => {
       filter.status = status;
     }
 
-    console.log('Assets filter:', filter); // Debug log
+    console.log('Assets filter:', filter); 
 
     const assets = await Asset.find(filter)
       .populate('type')
@@ -68,7 +66,6 @@ exports.getAllAssets = async (req, res) => {
 
 exports.getAsset = async (req, res) => {
   try {
-    // Validate the asset ID parameter
     if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
       return res.status(400).json({
         status: 'error',
@@ -87,7 +84,6 @@ exports.getAsset = async (req, res) => {
       });
     }
 
-    // Check if user has access to this asset
     if (req.user.role !== 'admin' && !asset.base._id.equals(req.user.base._id)) {
       return res.status(403).json({
         status: 'error',
@@ -114,7 +110,6 @@ exports.createAsset = async (req, res) => {
   try {
     const { type, base, currentQuantity, openingBalance, purchaseDate, cost, specifications, notes } = req.body;
 
-    // Validate asset type ObjectId
     if (!type || !mongoose.Types.ObjectId.isValid(type)) {
       return res.status(400).json({
         status: 'error',
@@ -122,7 +117,6 @@ exports.createAsset = async (req, res) => {
       });
     }
 
-    // Verify asset type exists
     const assetType = await AssetType.findById(type);
     if (!assetType) {
       return res.status(400).json({
@@ -131,7 +125,6 @@ exports.createAsset = async (req, res) => {
       });
     }
 
-    // Verify base exists and user has access
     let targetBase;
     if (req.user.role === 'admin') {
       if (!base || !mongoose.Types.ObjectId.isValid(base)) {
@@ -152,7 +145,6 @@ exports.createAsset = async (req, res) => {
       });
     }
 
-    // Generate asset ID
     const assetId = `AST-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
 
     const newAsset = await Asset.create({
@@ -187,7 +179,6 @@ exports.createAsset = async (req, res) => {
 
 exports.updateAsset = async (req, res) => {
   try {
-    // Validate the asset ID parameter
     if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
       return res.status(400).json({
         status: 'error',
@@ -204,7 +195,6 @@ exports.updateAsset = async (req, res) => {
       });
     }
 
-    // Check if user has access to this asset
     if (req.user.role !== 'admin' && !asset.base.equals(req.user.base._id)) {
       return res.status(403).json({
         status: 'error',
@@ -212,7 +202,6 @@ exports.updateAsset = async (req, res) => {
       });
     }
 
-    // Validate any ObjectIds in the update data
     if (req.body.type && !mongoose.Types.ObjectId.isValid(req.body.type)) {
       return res.status(400).json({
         status: 'error',
@@ -253,7 +242,6 @@ exports.updateAsset = async (req, res) => {
 
 exports.deleteAsset = async (req, res) => {
   try {
-    // Validate the asset ID parameter
     if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
       return res.status(400).json({
         status: 'error',
@@ -270,7 +258,6 @@ exports.deleteAsset = async (req, res) => {
       });
     }
 
-    // Check if user has access to this asset
     if (req.user.role !== 'admin' && !asset.base.equals(req.user.base._id)) {
       return res.status(403).json({
         status: 'error',

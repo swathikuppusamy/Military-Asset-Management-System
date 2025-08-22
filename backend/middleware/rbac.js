@@ -15,7 +15,6 @@ exports.checkBaseAccess = (req, res, next) => {
     return next();
   }
 
-  // For non-admin users, check if they're trying to access their own base data
   const requestedBaseId = req.params.baseId || req.body.base;
   
   if (requestedBaseId && !requestedBaseId.equals(req.user.base._id)) {

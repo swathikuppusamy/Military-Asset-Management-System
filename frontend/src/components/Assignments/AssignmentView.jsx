@@ -23,7 +23,6 @@ const AssignmentView = () => {
       const response = await assignmentsAPI.getById(id);
       console.log('Assignment response:', response.data);
       
-      // FIXED: Handle the correct response structure
       const assignmentData = response.data.data;
       console.log('Processed assignment:', assignmentData);
       
@@ -44,15 +43,13 @@ const handleReturn = async () => {
     const response = await assignmentsAPI.return(id);
     console.log('Return response:', response);
     
-    await loadAssignment(); // Refresh the data
+    await loadAssignment(); 
     
-    // Show success message
     alert('Assignment returned successfully!');
     
   } catch (error) {
     console.error('Error returning assignment:', error);
     
-    // More detailed error handling
     const errorMessage = error.response?.data?.message || 
                         error.message || 
                         'Error returning assignment. Please try again.';
@@ -70,15 +67,13 @@ const handleExpend = async () => {
     const response = await assignmentsAPI.expend(id);
     console.log('Expend response:', response);
     
-    await loadAssignment(); // Refresh the data
+    await loadAssignment(); 
     
-    // Show success message
     alert('Assignment marked as expended successfully!');
     
   } catch (error) {
     console.error('Error marking as expended:', error);
     
-    // More detailed error handling
     const errorMessage = error.response?.data?.message || 
                         error.message || 
                         'Error marking assignment as expended. Please try again.';

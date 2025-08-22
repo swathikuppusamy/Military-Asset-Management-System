@@ -36,7 +36,6 @@ const ExpendituresList = () => {
         reason: filters.reason
       };
 
-      // Remove empty filters
       Object.keys(params).forEach(key => {
         if (!params[key]) delete params[key];
       });
@@ -47,11 +46,9 @@ const ExpendituresList = () => {
       console.log('Full expenditures response:', response);
       console.log('Response data:', response.data);
       
-      // Try different response structures
       let expendituresData = [];
       
       if (response.data) {
-        // Try multiple possible response structures
         if (Array.isArray(response.data)) {
           expendituresData = response.data;
         } else if (response.data.data && Array.isArray(response.data.data)) {
@@ -236,23 +233,7 @@ const ExpendituresList = () => {
           emptyMessage="No expenditures found"
         />
         
-        {/* Debug section - remove this after fixing */}
-        {process.env.NODE_ENV === 'development' && (
-          <div className="mt-4 p-4 bg-gray-100 rounded-md">
-            <h3 className="text-sm font-medium text-gray-700 mb-2">Debug Info:</h3>
-            <p className="text-xs text-gray-600">Loading: {loading.toString()}</p>
-            <p className="text-xs text-gray-600">Expenditures count: {expenditures.length}</p>
-            <p className="text-xs text-gray-600">Filters: {JSON.stringify(filters, null, 2)}</p>
-            {expenditures.length > 0 && (
-              <details className="mt-2">
-                <summary className="text-xs text-gray-600 cursor-pointer">Sample expenditure data</summary>
-                <pre className="text-xs text-gray-600 mt-2 whitespace-pre-wrap">
-                  {JSON.stringify(expenditures[0], null, 2)}
-                </pre>
-              </details>
-            )}
-          </div>
-        )}
+        
       </Card>
     </div>
   );

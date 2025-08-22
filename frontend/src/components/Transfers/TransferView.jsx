@@ -20,7 +20,6 @@ const TransferView = () => {
       setLoading(true);
       const response = await transfersAPI.getById(id);
       
-      // Extract transfer data from the response
       let transferData = null;
       if (response.data && response.data.data && response.data.data.transfer) {
         transferData = response.data.data.transfer;
@@ -33,7 +32,6 @@ const TransferView = () => {
       setTransfer(transferData);
     } catch (error) {
       console.error('Error loading transfer:', error);
-      // Handle error - maybe show error message or redirect
       if (error.response?.status === 404) {
         navigate('/transfers');
       }
@@ -46,7 +44,7 @@ const TransferView = () => {
     try {
       setActionLoading(true);
       await transfersAPI.approve(id);
-      await loadTransfer(); // Reload to show updated status
+      await loadTransfer(); 
     } catch (error) {
       console.error('Error approving transfer:', error);
       alert('Error approving transfer. Please try again.');
@@ -60,7 +58,7 @@ const TransferView = () => {
       try {
         setActionLoading(true);
         await transfersAPI.reject(id);
-        await loadTransfer(); // Reload to show updated status
+        await loadTransfer(); 
       } catch (error) {
         console.error('Error rejecting transfer:', error);
         alert('Error rejecting transfer. Please try again.');
@@ -75,7 +73,7 @@ const TransferView = () => {
       try {
         setActionLoading(true);
         await transfersAPI.cancel(id);
-        await loadTransfer(); // Reload to show updated status
+        await loadTransfer(); 
       } catch (error) {
         console.error('Error cancelling transfer:', error);
         alert('Error cancelling transfer. Please try again.');

@@ -41,13 +41,12 @@ const assignmentSchema = new mongoose.Schema({
 purpose: {
     type: String,
     required: function() {
-      // Only require purpose for active assignments
       return this.status === 'active';
     }
   },
   status: {
     type: String,
-    enum: ['active', 'returned', 'pending', 'cancelled'], // adjust as needed
+    enum: ['active', 'returned', 'pending', 'cancelled'], 
     default: 'pending'
   },
   notes: String

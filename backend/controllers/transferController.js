@@ -8,14 +8,12 @@ exports.getAllTransfers = async (req, res) => {
     const { status, base, fromBase, toBase, assetType, startDate, endDate } = req.query;
     let filter = {};
 
-    // Apply role-based filtering
     if (req.user.role !== 'admin') {
       filter.$or = [
         { fromBase: req.user.base._id },
         { toBase: req.user.base._id }
       ];
     } else {
-      // Admin can filter by specific bases
       if (fromBase || toBase) {
         const baseFilters = [];
         if (fromBase) baseFilters.push({ fromBase: fromBase });
@@ -23,7 +21,6 @@ exports.getAllTransfers = async (req, res) => {
         
         if (baseFilters.length > 0) {
           if (filter.$or) {
-            // Combine with existing role-based filter
             filter.$and = [
               { $or: filter.$or },
               { $or: baseFilters }
@@ -34,7 +31,6 @@ exports.getAllTransfers = async (req, res) => {
           }
         }
       } else if (base) {
-        // Legacy base filter support
         filter.$or = [
           { fromBase: base },
           { toBase: base }
@@ -42,17 +38,14 @@ exports.getAllTransfers = async (req, res) => {
       }
     }
 
-    // Status filter
     if (status) filter.status = status;
 
-    // Date range filter
     if (startDate || endDate) {
       filter.createdAt = {};
       if (startDate) {
         filter.createdAt.$gte = new Date(startDate);
       }
       if (endDate) {
-        // Add one day to endDate to include the entire end date
         const endDateObj = new Date(endDate);
         endDateObj.setDate(endDateObj.getDate() + 1);
         filter.createdAt.$lt = endDateObj;
@@ -77,7 +70,6 @@ exports.getAllTransfers = async (req, res) => {
 
     const transfers = await query;
 
-    // Filter by asset type if specified (post-query filtering since it's nested)
     let filteredTransfers = transfers;
     if (assetType) {
       filteredTransfers = transfers.filter(transfer => {
@@ -128,7 +120,6 @@ exports.getTransfer = async (req, res) => {
       });
     }
 
-    // Check if user has access to this transfer
     if (req.user.role !== 'admin' && 
         !transfer.fromBase._id.equals(req.user.base._id) && 
         !transfer.toBase._id.equals(req.user.base._id)) {
@@ -159,7 +150,6 @@ exports.createTransfer = async (req, res) => {
 
     console.log('Received transfer data:', req.body);
 
-    // Validate required fields
     if (!asset || !quantity || !toBase) {
       return res.status(400).json({
         status: 'error',
@@ -167,7 +157,6 @@ exports.createTransfer = async (req, res) => {
       });
     }
 
-    // Verify asset exists
     const assetDoc = await Asset.findById(asset).populate('base').populate('type');
     if (!assetDoc) {
       return res.status(400).json({
@@ -178,7 +167,6 @@ exports.createTransfer = async (req, res) => {
 
     console.log('Asset found:', assetDoc);
 
-    // Check if user has access to the asset
     if (req.user.role !== 'admin' && !assetDoc.base._id.equals(req.user.base._id)) {
       return res.status(403).json({
         status: 'error',
@@ -186,7 +174,6 @@ exports.createTransfer = async (req, res) => {
       });
     }
 
-    // Check if quantity is available
     if (assetDoc.currentQuantity < quantity) {
       return res.status(400).json({
         status: 'error',
@@ -194,7 +181,6 @@ exports.createTransfer = async (req, res) => {
       });
     }
 
-    // Verify target base exists
     const targetBase = await Base.findById(toBase);
     if (!targetBase) {
       return res.status(400).json({
@@ -203,7 +189,6 @@ exports.createTransfer = async (req, res) => {
       });
     }
 
-    // Check if transferring to same base
     if (assetDoc.base._id.equals(toBase)) {
       return res.status(400).json({
         status: 'error',
@@ -279,7 +264,6 @@ exports.approveTransfer = async (req, res) => {
       });
     }
 
-    // Check if user has permission to approve
     if (req.user.role !== 'admin') {
       return res.status(403).json({
         status: 'error',
@@ -294,7 +278,6 @@ exports.approveTransfer = async (req, res) => {
       });
     }
 
-    // Check if asset still has sufficient quantity
     if (transfer.asset.currentQuantity < transfer.quantity) {
       return res.status(400).json({
         status: 'error',
@@ -426,7 +409,6 @@ exports.rejectTransfer = async (req, res) => {
   }
 };
 
-// NEW: Cancel Transfer Method
 exports.cancelTransfer = async (req, res) => {
   try {
     const transfer = await Transfer.findById(req.params.id);
@@ -438,8 +420,6 @@ exports.cancelTransfer = async (req, res) => {
       });
     }
 
-    // Check if user has permission to cancel
-    // Users can cancel their own pending transfers, or admins can cancel any pending transfer
     if (req.user.role !== 'admin' && !transfer.initiatedBy.equals(req.user._id)) {
       return res.status(403).json({
         status: 'error',
@@ -457,7 +437,6 @@ exports.cancelTransfer = async (req, res) => {
     transfer.status = 'cancelled';
     await transfer.save();
 
-    // Use modern populate syntax
     await transfer.populate([
       { 
         path: 'asset',

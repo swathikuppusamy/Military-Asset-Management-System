@@ -3,13 +3,10 @@ const router = express.Router();
 const AssetType = require('../models/AssetType');
 const mongoose = require('mongoose');
 
-// GET /api/v1/asset-types - Get all asset types
 router.get('/', async (req, res) => {
   try {
-    // Use actual database query instead of mock data
     const assetTypes = await AssetType.find({ isActive: true }).sort({ name: 1 });
     
-    // If no asset types exist, create some sample data
     if (assetTypes.length === 0) {
       const sampleAssetTypes = [
         {
@@ -46,7 +43,6 @@ router.get('/', async (req, res) => {
         }
       ];
 
-      // Create sample asset types
       const createdAssetTypes = await AssetType.create(sampleAssetTypes);
       
       return res.status(200).json({
@@ -70,7 +66,6 @@ router.get('/', async (req, res) => {
   }
 });
 
-// POST /api/v1/asset-types - Create a new asset type
 router.post('/', async (req, res) => {
   try {
     const newAssetType = await AssetType.create(req.body);
@@ -89,10 +84,8 @@ router.post('/', async (req, res) => {
   }
 });
 
-// GET /api/v1/asset-types/:id - Get a specific asset type
 router.get('/:id', async (req, res) => {
   try {
-    // Validate ObjectId
     if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
       return res.status(400).json({
         status: 'error',
@@ -122,10 +115,8 @@ router.get('/:id', async (req, res) => {
   }
 });
 
-// PUT /api/v1/asset-types/:id - Update an asset type
 router.put('/:id', async (req, res) => {
   try {
-    // Validate ObjectId
     if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
       return res.status(400).json({
         status: 'error',
@@ -159,10 +150,9 @@ router.put('/:id', async (req, res) => {
   }
 });
 
-// DELETE /api/v1/asset-types/:id - Delete an asset type
 router.delete('/:id', async (req, res) => {
   try {
-    // Validate ObjectId
+ 
     if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
       return res.status(400).json({
         status: 'error',

@@ -61,7 +61,6 @@ exports.getPurchase = async (req, res) => {
       });
     }
 
-    // Check if user has access to this purchase
     if (req.user.role !== 'admin' && !purchase.base._id.equals(req.user.base._id)) {
       return res.status(403).json({
         status: 'error',
@@ -97,7 +96,6 @@ exports.createPurchase = async (req, res) => {
       notes 
     } = req.body;
 
-    // Validate required fields
     if (!assetType || !quantity || !unitCost || !purchaseDate || !supplier) {
       return res.status(400).json({
         status: 'error',
@@ -105,7 +103,6 @@ exports.createPurchase = async (req, res) => {
       });
     }
 
-    // Verify asset type exists
     const assetTypeDoc = await AssetType.findById(assetType);
     if (!assetTypeDoc) {
       return res.status(400).json({
@@ -114,7 +111,6 @@ exports.createPurchase = async (req, res) => {
       });
     }
 
-    // Verify base exists and user has access
     let targetBase;
     if (req.user.role === 'admin') {
       if (!base) {
@@ -131,7 +127,6 @@ exports.createPurchase = async (req, res) => {
         });
       }
     } else {
-      // For non-admin users, use their assigned base
       targetBase = await Base.findById(req.user.base._id || req.user.base);
       if (!targetBase) {
         return res.status(400).json({
@@ -141,13 +136,10 @@ exports.createPurchase = async (req, res) => {
       }
     }
 
-    // Generate purchase ID
     const purchaseId = `PUR-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
 
-    // Calculate total cost
     const totalCost = quantity * unitCost;
 
-    // Create the purchase
     const newPurchase = await Purchase.create({
       purchaseId,
       assetType,
@@ -162,7 +154,6 @@ exports.createPurchase = async (req, res) => {
       notes: notes || ''
     });
 
-    // Create or update asset
     try {
       let asset = await Asset.findOne({
         type: assetType,
@@ -170,11 +161,9 @@ exports.createPurchase = async (req, res) => {
       });
 
       if (asset) {
-        // Update existing asset
         asset.currentQuantity += parseInt(quantity);
         await asset.save();
       } else {
-        // Create new asset
         const assetId = `AST-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
         asset = await Asset.create({
           assetId,
@@ -189,10 +178,8 @@ exports.createPurchase = async (req, res) => {
       }
     } catch (assetError) {
       logger.error(`Asset creation/update error: ${assetError.message}`);
-      // Don't fail the purchase if asset update fails, just log it
     }
 
-    // Populate the purchase with related data
     await newPurchase.populate([
       { path: 'assetType' },
       { path: 'base' },
@@ -226,7 +213,6 @@ exports.updatePurchase = async (req, res) => {
       });
     }
 
-    // Check if user has access to this purchase
     if (req.user.role !== 'admin' && !purchase.base.equals(req.user.base._id)) {
       return res.status(403).json({
         status: 'error',
@@ -234,7 +220,6 @@ exports.updatePurchase = async (req, res) => {
       });
     }
 
-    // If quantity or unitCost is being updated, recalculate totalCost
     const updateData = { ...req.body };
     if (updateData.quantity || updateData.unitCost) {
       const newQuantity = updateData.quantity || purchase.quantity;
@@ -281,7 +266,6 @@ exports.deletePurchase = async (req, res) => {
       });
     }
 
-    // Check if user has access to this purchase
     if (req.user.role !== 'admin' && !purchase.base.equals(req.user.base._id)) {
       return res.status(403).json({
         status: 'error',

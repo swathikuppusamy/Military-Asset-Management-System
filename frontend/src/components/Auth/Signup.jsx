@@ -12,7 +12,6 @@ const Signup = () => {
   const [bases, setBases] = useState([]);
   const watchRole = watch('role');
 
-  // Fetch bases for non-admin users
   useEffect(() => {
     const fetchBases = async () => {
       try {
@@ -31,7 +30,6 @@ const Signup = () => {
       setLoading(true);
       setError('');
       
-      // Remove base field if role is admin
       if (data.role === 'admin') {
         delete data.base;
       }

@@ -26,7 +26,6 @@ const Bases = () => {
       
       let basesData = response.data;
       
-      // Handle different response structures
       if (Array.isArray(basesData)) {
         setBases(basesData);
       } else if (basesData && Array.isArray(basesData.data)) {
@@ -86,10 +85,8 @@ const Bases = () => {
 
     try {
       setError('');
-      // Update the base with the new status
       await basesAPI.update(id, { isActive: !currentStatus });
       
-      // Update local state
       setBases(bases.map(base => 
         base._id === id 
           ? { ...base, isActive: !currentStatus }

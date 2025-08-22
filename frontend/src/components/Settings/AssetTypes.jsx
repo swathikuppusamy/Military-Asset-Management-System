@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
-// Fix the import - use named import with correct destructuring
 import { assetTypesAPI } from '../../services/api';
 import Table from '../common/Table';
 import Card from '../common/Card';
@@ -19,7 +18,6 @@ const AssetTypes = () => {
     try {
       setLoading(true);
       const response = await assetTypesAPI.getAll();
-      // Make sure to access the data property from the response
       setAssetTypes(response.data.data || response.data);
     } catch (error) {
       console.error('Error loading asset types:', error);
@@ -34,14 +32,12 @@ const AssetTypes = () => {
         await assetTypesAPI.update(editingType._id, data);
         setEditingType(null);
       } else {
-        // This should now work with the corrected import
         await assetTypesAPI.create(data);
       }
       reset();
       loadAssetTypes();
     } catch (error) {
       console.error('Error saving asset type:', error);
-      // Add user-friendly error handling
       alert('Error saving asset type. Please try again.');
     }
   };

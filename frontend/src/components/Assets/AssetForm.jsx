@@ -35,7 +35,6 @@ const AssetForm = () => {
       console.log('Bases Response:', basesResponse);
       console.log('Types Response:', typesResponse);
       
-      // Handle different response structures
       let basesData = [];
       if (basesResponse?.data?.data?.bases) {
         basesData = basesResponse.data.data.bases;
@@ -76,7 +75,6 @@ const AssetForm = () => {
       const response = await assetsAPI.getById(id);
       console.log('Asset API Response:', response);
       
-      // Handle the nested response structure correctly
       const asset = response.data?.data?.asset || response.data?.asset || response.data;
       console.log('Extracted asset data:', asset);
       
@@ -87,8 +85,6 @@ const AssetForm = () => {
         return;
       }
 
-      // Populate form fields with asset data
-      // Basic fields
       setValue('assetId', asset.assetId || '');
       setValue('name', asset.name || '');
       setValue('currentQuantity', asset.currentQuantity || 0);
@@ -97,21 +93,18 @@ const AssetForm = () => {
       setValue('specifications', asset.specifications || '');
       setValue('notes', asset.notes || '');
       
-      // Handle date field - convert to YYYY-MM-DD format for input[type="date"]
       if (asset.purchaseDate) {
         const date = new Date(asset.purchaseDate);
         const formattedDate = date.toISOString().split('T')[0];
         setValue('purchaseDate', formattedDate);
       }
       
-      // Handle type field - extract ObjectId from populated object or use directly
       if (asset.type) {
         const typeId = typeof asset.type === 'object' ? asset.type._id : asset.type;
         setValue('type', typeId);
         console.log('Set type to:', typeId);
       }
       
-      // Handle base field - extract ObjectId from populated object or use directly
       if (asset.base) {
         const baseId = typeof asset.base === 'object' ? asset.base._id : asset.base;
         setValue('base', baseId);
@@ -137,7 +130,6 @@ const AssetForm = () => {
       setLoading(true);
       console.log('Submitting form data:', data);
       
-      // Convert numeric fields
       const formData = {
         ...data,
         currentQuantity: parseInt(data.currentQuantity) || 0,
@@ -162,7 +154,6 @@ const AssetForm = () => {
     }
   };
 
-  // Show loading state while form data is being fetched
   if (formDataLoading) {
     return (
       <div className="max-w-2xl mx-auto">
@@ -176,7 +167,6 @@ const AssetForm = () => {
     );
   }
 
-  // Show loading state while asset data is being fetched (for edit mode)
   if (id && assetLoading) {
     return (
       <div className="max-w-2xl mx-auto">

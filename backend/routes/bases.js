@@ -3,12 +3,10 @@ const router = express.Router();
 const Base = require('../models/Base');
 const mongoose = require('mongoose');
 
-// GET /api/v1/bases - Get all bases
 router.get('/', async (req, res) => {
   try {
     const bases = await Base.find({ isActive: true }).sort({ name: 1 });
     
-    // If no bases exist, create some sample data
     if (bases.length === 0) {
       const sampleBases = [
         {
@@ -72,7 +70,6 @@ router.get('/', async (req, res) => {
   }
 });
 
-// POST /api/v1/bases - Create a new base
 router.post('/', async (req, res) => {
   try {
     const newBase = await Base.create(req.body);
@@ -91,7 +88,6 @@ router.post('/', async (req, res) => {
   }
 });
 
-// GET /api/v1/bases/:id - Get a specific base
 router.get('/:id', async (req, res) => {
   try {
     if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
@@ -123,7 +119,6 @@ router.get('/:id', async (req, res) => {
   }
 });
 
-// PUT /api/v1/bases/:id - Update a base
 router.put('/:id', async (req, res) => {
   try {
     if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
@@ -159,7 +154,6 @@ router.put('/:id', async (req, res) => {
   }
 });
 
-// DELETE /api/v1/bases/:id - Delete a base (soft delete)
 router.delete('/:id', async (req, res) => {
   try {
     if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
@@ -169,7 +163,6 @@ router.delete('/:id', async (req, res) => {
       });
     }
 
-    // Soft delete by setting isActive to false
     const deletedBase = await Base.findByIdAndUpdate(
       req.params.id, 
       { isActive: false }, 
