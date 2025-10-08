@@ -22,10 +22,17 @@ exports.getAllExpenditures = catchAsync(async (req, res, next) => {
   const skip = (page - 1) * limit;
   
   const expenditures = await Expenditure.find(filter)
-    .populate('asset', 'name serialNumber assetType')
-    .populate('base', 'name location')
-    .populate('expendedBy', 'name email rank')
-    .populate('approvedBy', 'name email')
+    .populate({
+      path: 'asset',
+      select: 'name assetId serialNumber currentQuantity',
+      populate: {
+        path: 'type',
+        select: 'name category unit'
+      }
+    })
+    .populate('base', 'name code location')
+    .populate('expendedBy', 'name username email rank')
+    .populate('approvedBy', 'name username email')
     .sort({ expendedDate: -1 })
     .skip(skip)
     .limit(parseInt(limit));
@@ -44,10 +51,17 @@ exports.getAllExpenditures = catchAsync(async (req, res, next) => {
 
 exports.getExpenditure = catchAsync(async (req, res, next) => {
   const expenditure = await Expenditure.findById(req.params.id)
-    .populate('asset', 'name serialNumber assetType')
-    .populate('base', 'name location')
-    .populate('expendedBy', 'name email rank')
-    .populate('approvedBy', 'name email');
+    .populate({
+      path: 'asset',
+      select: 'name assetId serialNumber currentQuantity',
+      populate: {
+        path: 'type',
+        select: 'name category unit'
+      }
+    })
+    .populate('base', 'name code location')
+    .populate('expendedBy', 'name username email rank')
+    .populate('approvedBy', 'name username email');
   
   if (!expenditure) {
     return next(new AppError('No expenditure found with that ID', 404));
@@ -67,7 +81,7 @@ exports.createExpenditure = catchAsync(async (req, res, next) => {
     return next(new AppError('Asset not found', 404));
   }
   
-  if (assetDoc.quantity < quantity) {
+  if (assetDoc.currentQuantity < quantity) {
     return next(new AppError('Insufficient asset quantity available', 400));
   }
   
@@ -78,13 +92,20 @@ exports.createExpenditure = catchAsync(async (req, res, next) => {
   });
   
   // Update asset quantity
-  assetDoc.quantity -= quantity;
+  assetDoc.currentQuantity -= quantity;
   await assetDoc.save();
   
   await expenditure.populate([
-    { path: 'asset', select: 'name serialNumber assetType' },
-    { path: 'base', select: 'name location' },
-    { path: 'expendedBy', select: 'name email rank' }
+    { 
+      path: 'asset',
+      select: 'name assetId serialNumber currentQuantity',
+      populate: {
+        path: 'type',
+        select: 'name category unit'
+      }
+    },
+    { path: 'base', select: 'name code location' },
+    { path: 'expendedBy', select: 'name username email rank' }
   ]);
   
   res.status(201).json({
@@ -110,10 +131,17 @@ exports.updateExpenditure = catchAsync(async (req, res, next) => {
     req.body,
     { new: true, runValidators: true }
   ).populate([
-    { path: 'asset', select: 'name serialNumber assetType' },
-    { path: 'base', select: 'name location' },
-    { path: 'expendedBy', select: 'name email rank' },
-    { path: 'approvedBy', select: 'name email' }
+    { 
+      path: 'asset',
+      select: 'name assetId serialNumber currentQuantity',
+      populate: {
+        path: 'type',
+        select: 'name category unit'
+      }
+    },
+    { path: 'base', select: 'name code location' },
+    { path: 'expendedBy', select: 'name username email rank' },
+    { path: 'approvedBy', select: 'name username email' }
   ]);
   
   res.status(200).json({
@@ -133,10 +161,17 @@ exports.approveExpenditure = catchAsync(async (req, res, next) => {
     },
     { new: true, runValidators: true }
   ).populate([
-    { path: 'asset', select: 'name serialNumber assetType' },
-    { path: 'base', select: 'name location' },
-    { path: 'expendedBy', select: 'name email rank' },
-    { path: 'approvedBy', select: 'name email' }
+    { 
+      path: 'asset',
+      select: 'name assetId serialNumber currentQuantity',
+      populate: {
+        path: 'type',
+        select: 'name category unit'
+      }
+    },
+    { path: 'base', select: 'name code location' },
+    { path: 'expendedBy', select: 'name username email rank' },
+    { path: 'approvedBy', select: 'name username email' }
   ]);
   
   if (!expenditure) {
@@ -163,7 +198,7 @@ exports.deleteExpenditure = catchAsync(async (req, res, next) => {
   
   const asset = await Asset.findById(expenditure.asset);
   if (asset) {
-    asset.quantity += expenditure.quantity;
+    asset.currentQuantity += expenditure.quantity;
     await asset.save();
   }
   
@@ -174,7 +209,6 @@ exports.deleteExpenditure = catchAsync(async (req, res, next) => {
     data: null
   });
 });
-
 
 exports.getExpenditureStats = catchAsync(async (req, res, next) => {
   const stats = await Expenditure.aggregate([
